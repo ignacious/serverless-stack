@@ -20,9 +20,6 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-  # Load our secret environment variables based on the current stage.
-  # Fallback to default if it is not in prod.
-  environment: ${file(env.yml):${self:custom.stage}, file(env.yml):default}
 
 provider:
   name: aws
@@ -35,6 +32,10 @@ provider:
   environment:
     tableName: ${self:custom.tableName}
     stripeSecretKey: ${self:custom.environment.stripeSecretKey}
+  # These environment variables are made available to our functions
+  # under process.env.
+  environment:
+    tableName: ${self:custom.tableName}
 
   iamRoleStatements:
     - Effect: Allow
@@ -133,3 +134,9 @@ resources:
   # Cognito
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}
+
+  # Create our resources with separate CloudFormation templates
+resources:
+  # DynamoDB
+  - ${file(resources/dynamodb-table.yml)}
+  
